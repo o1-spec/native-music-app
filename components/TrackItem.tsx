@@ -60,11 +60,12 @@ interface TrackItemProps {
 }
 
 export function TrackItem({ track, horizontal = true }: TrackItemProps) {
-  const { setCurrentTrack, setQueue } = usePlayerStore();
+  const { setCurrentTrack, setQueue, playPause } = usePlayerStore();
 
   const handlePlay = () => {
     setQueue([track]);
     setCurrentTrack(track);
+    playPause(); 
   };
 
   return (
