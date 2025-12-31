@@ -1,7 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { addFavorite, isFavorite, removeFavorite } from "../lib/storage";
 import { usePlayerStore } from "../store/playerStore";
 
 const styles = StyleSheet.create({
@@ -47,11 +48,29 @@ const styles = StyleSheet.create({
 function MiniPlayer() {
   const { currentTrack, isPlaying, playPause, nextTrack } = usePlayerStore();
   const router = useRouter();
+  const [isFav, setIsFav] = useState(false);
+
+  useEffect(() => {
+    if (currentTrack) {
+      isFavorite(currentTrack).then(setIsFav);
+    }
+  }, [currentTrack]);
 
   if (!currentTrack) return null;
 
   const handleExpand = () => {
     router.push("/player");
+  };
+
+  const toggleFav = () => {
+    if (!currentTrack) return;
+    if (isFav) {
+      removeFavorite(currentTrack);
+      setIsFav(false);
+    } else {
+      addFavorite(currentTrack);
+      setIsFav(true);
+    }
   };
 
   return (
@@ -71,6 +90,9 @@ function MiniPlayer() {
         </View>
       </TouchableOpacity>
       <View style={styles.controls}>
+        <TouchableOpacity onPress={toggleFav} style={styles.controlButton}>
+          <Ionicons name={isFav ? "heart" : "heart-outline"} size={24} color={isFav ? "red" : "white"} />
+        </TouchableOpacity>
         <TouchableOpacity onPress={playPause} style={styles.controlButton}>
           <Ionicons name={isPlaying ? "pause" : "play"} size={24} color="white" />
         </TouchableOpacity>

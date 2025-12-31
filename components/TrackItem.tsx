@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { addFavorite, isFavorite, removeFavorite } from '../lib/storage';
 import { usePlayerStore } from '../store/playerStore';
 import { Track } from '../types/music';
 
@@ -52,6 +53,12 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 8,
   },
+  favButton: {
+    position: 'absolute',
+    top: 8,
+    left: 8,
+    padding: 8,
+  },
 });
 
 interface TrackItemProps {
@@ -62,11 +69,26 @@ interface TrackItemProps {
 
 export function TrackItem({ track, horizontal = true, onPress }: TrackItemProps) {
   const { setCurrentTrack, setQueue, playPause } = usePlayerStore();
+  const [isFav, setIsFav] = useState(false);
+
+  useEffect(() => {
+    isFavorite(track).then(setIsFav);
+  }, [track]);
 
   const handlePlay = () => {
     setQueue([track]);
     setCurrentTrack(track);
     playPause();
+  };
+
+  const toggleFav = () => {
+    if (isFav) {
+      removeFavorite(track);
+      setIsFav(false);
+    } else {
+      addFavorite(track);
+      setIsFav(true);
+    }
   };
 
   return (
@@ -86,6 +108,9 @@ export function TrackItem({ track, horizontal = true, onPress }: TrackItemProps)
           {track.artist}
         </Text>
       </View>
+      <TouchableOpacity style={styles.favButton} onPress={toggleFav}>
+        <Ionicons name={isFav ? "heart" : "heart-outline"} size={20} color={isFav ? "red" : "white"} />
+      </TouchableOpacity>
       <TouchableOpacity style={styles.playButton} onPress={onPress || handlePlay}>
         <Ionicons name="play" size={16} color="white" />
       </TouchableOpacity>

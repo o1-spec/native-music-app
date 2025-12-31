@@ -2,9 +2,10 @@ import PlayerControls from '@/components/PlayerControls';
 import ProgressBar from '@/components/ProgressBar';
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { addFavorite, isFavorite, removeFavorite } from '../lib/storage';
 import { usePlayerStore } from '../store/playerStore';
 
 const styles = StyleSheet.create({
@@ -17,8 +18,14 @@ const styles = StyleSheet.create({
   },
   minimizeButton: {
     position: 'absolute',
-    top: 50, // Adjust for safe area
+    top: 50, 
     right: 16,
+    padding: 8,
+  },
+  favButton: {
+    position: 'absolute',
+    top: 50,
+    left: 16,
     padding: 8,
   },
   image: {
@@ -49,9 +56,27 @@ const styles = StyleSheet.create({
 function Player() {
   const router = useRouter();
   const { currentTrack, isPlaying, currentTime, duration, playPause, nextTrack, previousTrack, setSeekTime } = usePlayerStore();
+  const [isFav, setIsFav] = useState(false);
+
+  useEffect(() => {
+    if (currentTrack) {
+      isFavorite(currentTrack).then(setIsFav);
+    }
+  }, [currentTrack]);
 
   const seek = (time: number) => {
     setSeekTime(time);
+  };
+
+  const toggleFav = () => {
+    if (!currentTrack) return;
+    if (isFav) {
+      removeFavorite(currentTrack);
+      setIsFav(false);
+    } else {
+      addFavorite(currentTrack);
+      setIsFav(true);
+    }
   };
 
   if (!currentTrack) {
@@ -64,8 +89,11 @@ function Player() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <TouchableOpacity onPress={toggleFav} style={styles.favButton}>
+        <Ionicons name={isFav ? "heart" : "heart-outline"} size={24} color={isFav ? "red" : "white"} />
+      </TouchableOpacity>
       <TouchableOpacity onPress={() => router.back()} style={styles.minimizeButton}>
-        <Ionicons name="chevron-back" size={24} color="white" />
+        <Ionicons name="chevron-down" size={24} color="white" />
       </TouchableOpacity>
       <Image
         source={{ uri: currentTrack.artworkUrl || "https://via.placeholder.com/300" }}

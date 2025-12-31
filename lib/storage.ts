@@ -51,3 +51,27 @@ export const addRecentSearch = async (query: string): Promise<void> => {
   const limited = filtered.slice(0, 10);
   await setItem('recentSearches', JSON.stringify(limited));
 };
+
+export const getFavorites = async (): Promise<Track[]> => {
+  const data = await getItem('favorites');
+  return data ? JSON.parse(data) : [];
+};
+
+export const addFavorite = async (track: Track): Promise<void> => {
+  const favs = await getFavorites();
+  if (!favs.find(t => t.id === track.id)) {
+    favs.push(track);
+    await setItem('favorites', JSON.stringify(favs));
+  }
+};
+
+export const removeFavorite = async (track: Track): Promise<void> => {
+  const favs = await getFavorites();
+  const filtered = favs.filter(t => t.id !== track.id);
+  await setItem('favorites', JSON.stringify(filtered));
+};
+
+export const isFavorite = async (track: Track): Promise<boolean> => {
+  const favs = await getFavorites();
+  return favs.some(t => t.id === track.id);
+};
