@@ -1,7 +1,8 @@
 import { TrackItem } from "@/components/TrackItem";
+import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, SectionList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { getAlbum } from "../../lib/musicApi";
@@ -13,13 +14,37 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#111827',
   },
-  content: {
+  list: {
     padding: 16,
+  },
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  backButton: {
+    marginRight: 16,
+  },
+  topTitle: {
+    color: 'white',
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  headerCard: {
+    backgroundColor: '#1f2937',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
   },
   image: {
     width: '100%',
     height: 256,
-    borderRadius: 12,
+    borderRadius: 8,
     marginBottom: 16,
   },
   title: {
@@ -27,22 +52,24 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 8,
+    textAlign: 'center',
   },
   artist: {
     color: '#9ca3af',
     fontSize: 18,
     marginBottom: 16,
+    textAlign: 'center',
   },
   buttons: {
     flexDirection: 'row',
-    marginBottom: 24,
+    justifyContent: 'center',
   },
   button: {
     backgroundColor: '#3b82f6',
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 8,
-    marginRight: 16,
+    marginHorizontal: 8,
   },
   buttonText: {
     color: 'white',
@@ -52,8 +79,12 @@ const styles = StyleSheet.create({
   shuffleButton: {
     backgroundColor: '#6b7280',
   },
+  item: {
+    marginBottom: 8,
+  },
   loadingContainer: {
     flex: 1,
+    backgroundColor: '#111827',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -110,10 +141,43 @@ function Playlist() {
     }
   };
 
-  const renderTrack = ({ item }: { item: Track }) => (
-    <Animated.View entering={FadeInUp.duration(600)}>
-      <TrackItem track={item} />
+  const renderItem = ({ item }: { item: Track }) => (
+    <Animated.View entering={FadeInUp.duration(600)} style={styles.item}>
+      <TrackItem track={item} horizontal={false} />
     </Animated.View>
+  );
+
+  const renderHeader = () => (
+    <>
+      <Animated.View entering={FadeInUp.duration(600)} style={styles.topBar}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color="white" />
+        </TouchableOpacity>
+        <Text style={styles.topTitle}>Album</Text>
+      </Animated.View>
+      <Animated.View entering={FadeInUp.duration(600)} style={styles.headerCard}>
+        <Animated.Image
+          entering={FadeInDown.duration(800)}
+          source={{ uri: album?.artworkUrl || "https://via.placeholder.com/300" }}
+          style={styles.image}
+          resizeMode="cover"
+        />
+        <Animated.Text entering={FadeInUp.duration(600).delay(200)} style={styles.title}>
+          {album?.title}
+        </Animated.Text>
+        <Animated.Text entering={FadeInUp.duration(600).delay(300)} style={styles.artist}>
+          {album?.artist}
+        </Animated.Text>
+        <Animated.View entering={FadeInUp.duration(600).delay(400)} style={styles.buttons}>
+          <TouchableOpacity onPress={handlePlay} style={styles.button}>
+            <Text style={styles.buttonText}>Play</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleShuffle} style={[styles.button, styles.shuffleButton]}>
+            <Text style={styles.buttonText}>Shuffle</Text>
+          </TouchableOpacity>
+        </Animated.View>
+      </Animated.View>
+    </>
   );
 
   if (loading) {
@@ -139,35 +203,17 @@ function Playlist() {
 
   if (!album) return null;
 
+  const sections = [{ title: 'Tracks', data: album.tracks }];
+
   return (
     <SafeAreaView style={styles.container}>
-      <Animated.ScrollView entering={FadeInUp.duration(600)} style={styles.content}>
-        <Animated.Image
-          entering={FadeInDown.duration(800)}
-          source={{ uri: album.artworkUrl || "https://via.placeholder.com/300" }}
-          style={styles.image}
-          resizeMode="cover"
-        />
-        <Animated.Text entering={FadeInUp.duration(600).delay(200)} style={styles.title}>
-          {album.title}
-        </Animated.Text>
-        <Animated.Text entering={FadeInUp.duration(600).delay(300)} style={styles.artist}>
-          {album.artist}
-        </Animated.Text>
-        <Animated.View entering={FadeInUp.duration(600).delay(400)} style={styles.buttons}>
-          <TouchableOpacity onPress={handlePlay} style={styles.button}>
-            <Text style={styles.buttonText}>Play</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={handleShuffle} style={[styles.button, styles.shuffleButton]}>
-            <Text style={styles.buttonText}>Shuffle</Text>
-          </TouchableOpacity>
-        </Animated.View>
-        <FlatList
-          data={album.tracks}
-          renderItem={renderTrack}
-          keyExtractor={(item) => item.id.toString()}
-        />
-      </Animated.ScrollView>
+      <SectionList
+        sections={sections}
+        renderItem={renderItem}
+        ListHeaderComponent={renderHeader}
+        keyExtractor={(item) => item.id.toString()}
+        contentContainerStyle={styles.list}
+      />
     </SafeAreaView>
   );
 }

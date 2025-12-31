@@ -1,25 +1,19 @@
 import { AlbumCard } from "@/components/AlbumCard";
 import { TrackItem } from "@/components/TrackItem";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, SectionList, StyleSheet, Text } from "react-native";
+import { ActivityIndicator, FlatList, ScrollView, StyleSheet, Text } from "react-native";
 import Animated, { FadeInUp } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { searchMusic } from "../../lib/musicApi";
 import { getRecentlyPlayed } from "../../lib/storage";
 import { Album, Track } from "../../types/music";
 
-type SectionType = {
-  title: string;
-  data: (Track | Album)[];
-  isTrack: boolean;
-};
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#111827',
   },
-  list: {
+  scrollView: {
     padding: 16,
   },
   greeting: {
@@ -28,17 +22,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 24,
   },
-  sectionHeader: {
+  section: {
+    marginBottom: 32,
+  },
+  sectionTitle: {
     color: 'white',
     fontSize: 18,
     marginBottom: 12,
-    marginTop: 16,
-  },
-  item: {
-    marginBottom: 8,
-  },
-  albumItem: {
-    marginRight: 16,
   },
   loadingContainer: {
     flex: 1,
@@ -94,33 +84,8 @@ function Home() {
     fetchData();
   }, []);
 
-  const sections: SectionType[] = [
-    ...(recentlyPlayed.length > 0 ? [{ title: 'Recently Played', data: recentlyPlayed as (Track | Album)[], isTrack: true }] : []),
-    { title: 'Pop Hits', data: popSongs as (Track | Album)[], isTrack: true },
-    { title: 'Rock Classics', data: rockSongs as (Track | Album)[], isTrack: true },
-    { title: 'Hip Hop', data: hipHopSongs as (Track | Album)[], isTrack: true },
-    { title: 'Jazz Vibes', data: jazzSongs as (Track | Album)[], isTrack: true },
-    { title: 'Country', data: countrySongs as (Track | Album)[], isTrack: true },
-    { title: 'Featured Albums', data: featuredAlbums as (Track | Album)[], isTrack: false },
-  ];
-
-  const renderItem = ({ item, section }: { item: Track | Album; section: SectionType }) => (
-    <Animated.View entering={FadeInUp.duration(600)} style={section.isTrack ? styles.item : styles.albumItem}>
-      {section.isTrack ? <TrackItem track={item as Track} horizontal={false} /> : <AlbumCard album={item as Album} />}
-    </Animated.View>
-  );
-
-  const renderSectionHeader = ({ section: { title } }: { section: SectionType }) => (
-    <Animated.Text entering={FadeInUp.duration(600)} style={styles.sectionHeader}>
-      {title}
-    </Animated.Text>
-  );
-
-  const renderHeader = () => (
-    <Animated.Text entering={FadeInUp.duration(600)} style={styles.greeting}>
-      {greeting}
-    </Animated.Text>
-  );
+  const renderTrack = ({ item }: { item: Track }) => <TrackItem track={item} horizontal={true} />;
+  const renderAlbum = ({ item }: { item: Album }) => <AlbumCard album={item} />;
 
   if (loading) {
     return (
@@ -133,14 +98,100 @@ function Home() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <SectionList
-        sections={sections}
-        renderItem={renderItem}
-        renderSectionHeader={renderSectionHeader}
-        ListHeaderComponent={renderHeader}
-        keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={styles.list}
-      />
+      <ScrollView style={styles.scrollView}>
+        <Animated.Text
+          entering={FadeInUp.duration(600)}
+          style={styles.greeting}
+        >
+          {greeting}
+        </Animated.Text>
+
+        {/* Recently Played */}
+        {recentlyPlayed.length > 0 && (
+          <Animated.View entering={FadeInUp.duration(600).delay(200)} style={styles.section}>
+            <Text style={styles.sectionTitle}>Recently Played</Text>
+            <FlatList
+              data={recentlyPlayed}
+              renderItem={renderTrack}
+              keyExtractor={(item) => item.id.toString()}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+            />
+          </Animated.View>
+        )}
+
+        {/* Pop Songs */}
+        <Animated.View entering={FadeInUp.duration(600).delay(400)} style={styles.section}>
+          <Text style={styles.sectionTitle}>Pop Hits</Text>
+          <FlatList
+            data={popSongs}
+            renderItem={renderTrack}
+            keyExtractor={(item) => item.id.toString()}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+          />
+        </Animated.View>
+
+        {/* Rock Songs */}
+        <Animated.View entering={FadeInUp.duration(600).delay(600)} style={styles.section}>
+          <Text style={styles.sectionTitle}>Rock Classics</Text>
+          <FlatList
+            data={rockSongs}
+            renderItem={renderTrack}
+            keyExtractor={(item) => item.id.toString()}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+          />
+        </Animated.View>
+
+        {/* Hip Hop Songs */}
+        <Animated.View entering={FadeInUp.duration(600).delay(800)} style={styles.section}>
+          <Text style={styles.sectionTitle}>Hip Hop</Text>
+          <FlatList
+            data={hipHopSongs}
+            renderItem={renderTrack}
+            keyExtractor={(item) => item.id.toString()}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+          />
+        </Animated.View>
+
+        {/* Jazz Songs */}
+        <Animated.View entering={FadeInUp.duration(600).delay(1000)} style={styles.section}>
+          <Text style={styles.sectionTitle}>Jazz Vibes</Text>
+          <FlatList
+            data={jazzSongs}
+            renderItem={renderTrack}
+            keyExtractor={(item) => item.id.toString()}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+          />
+        </Animated.View>
+
+        {/* Country Songs */}
+        <Animated.View entering={FadeInUp.duration(600).delay(1200)} style={styles.section}>
+          <Text style={styles.sectionTitle}>Country</Text>
+          <FlatList
+            data={countrySongs}
+            renderItem={renderTrack}
+            keyExtractor={(item) => item.id.toString()}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+          />
+        </Animated.View>
+
+        {/* Featured Albums */}
+        <Animated.View entering={FadeInUp.duration(600).delay(1400)} style={styles.section}>
+          <Text style={styles.sectionTitle}>Featured Albums</Text>
+          <FlatList
+            data={featuredAlbums}
+            renderItem={renderAlbum}
+            keyExtractor={(item) => item.id.toString()}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+          />
+        </Animated.View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
