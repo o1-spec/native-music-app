@@ -23,7 +23,7 @@ export const searchMusic = async (query: string): Promise<{ tracks: Track[]; alb
       title: item.collectionName,
       artist: item.artistName,
       artworkUrl: item.artworkUrl100,
-      tracks: [], // Fetch tracks separately if needed
+      tracks: [], 
     }));
 
   return { tracks, albums };
