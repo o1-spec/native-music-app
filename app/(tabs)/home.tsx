@@ -1,7 +1,8 @@
 import { AlbumCard } from "@/components/AlbumCard";
 import { TrackItem } from "@/components/TrackItem";
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, ScrollView, StyleSheet, Text } from "react-native";
+import { ActivityIndicator, FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Animated, { FadeInUp } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { searchMusic } from "../../lib/musicApi";
@@ -25,10 +26,19 @@ const styles = StyleSheet.create({
   section: {
     marginBottom: 32,
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
   sectionTitle: {
     color: 'white',
     fontSize: 18,
-    marginBottom: 12,
+  },
+  showMore: {
+    color: '#3b82f6',
+    fontSize: 16,
   },
   loadingContainer: {
     flex: 1,
@@ -44,6 +54,7 @@ const styles = StyleSheet.create({
 });
 
 function Home() {
+  const router = useRouter();
   const [greeting, setGreeting] = useState("Good morning");
   const [recentlyPlayed, setRecentlyPlayed] = useState<Track[]>([]);
   const [popSongs, setPopSongs] = useState<Track[]>([]);
@@ -109,7 +120,9 @@ function Home() {
         {/* Recently Played */}
         {recentlyPlayed.length > 0 && (
           <Animated.View entering={FadeInUp.duration(600).delay(200)} style={styles.section}>
-            <Text style={styles.sectionTitle}>Recently Played</Text>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Recently Played</Text>
+            </View>
             <FlatList
               data={recentlyPlayed}
               renderItem={renderTrack}
@@ -122,7 +135,12 @@ function Home() {
 
         {/* Pop Songs */}
         <Animated.View entering={FadeInUp.duration(600).delay(400)} style={styles.section}>
-          <Text style={styles.sectionTitle}>Pop Hits</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Pop Hits</Text>
+            <TouchableOpacity onPress={() => router.push({ pathname: '/genre', params: { genre: 'pop' } })}>
+              <Text style={styles.showMore}>Show More</Text>
+            </TouchableOpacity>
+          </View>
           <FlatList
             data={popSongs}
             renderItem={renderTrack}
@@ -134,7 +152,12 @@ function Home() {
 
         {/* Rock Songs */}
         <Animated.View entering={FadeInUp.duration(600).delay(600)} style={styles.section}>
-          <Text style={styles.sectionTitle}>Rock Classics</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Rock Classics</Text>
+            <TouchableOpacity onPress={() => router.push({ pathname: '/genre', params: { genre: 'rock' } })}>
+              <Text style={styles.showMore}>Show More</Text>
+            </TouchableOpacity>
+          </View>
           <FlatList
             data={rockSongs}
             renderItem={renderTrack}
@@ -146,7 +169,12 @@ function Home() {
 
         {/* Hip Hop Songs */}
         <Animated.View entering={FadeInUp.duration(600).delay(800)} style={styles.section}>
-          <Text style={styles.sectionTitle}>Hip Hop</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Hip Hop</Text>
+            <TouchableOpacity onPress={() => router.push({ pathname: '/genre', params: { genre: 'hip hop' } })}>
+              <Text style={styles.showMore}>Show More</Text>
+            </TouchableOpacity>
+          </View>
           <FlatList
             data={hipHopSongs}
             renderItem={renderTrack}
@@ -158,7 +186,12 @@ function Home() {
 
         {/* Jazz Songs */}
         <Animated.View entering={FadeInUp.duration(600).delay(1000)} style={styles.section}>
-          <Text style={styles.sectionTitle}>Jazz Vibes</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Jazz Vibes</Text>
+            <TouchableOpacity onPress={() => router.push({ pathname: '/genre', params: { genre: 'jazz' } })}>
+              <Text style={styles.showMore}>Show More</Text>
+            </TouchableOpacity>
+          </View>
           <FlatList
             data={jazzSongs}
             renderItem={renderTrack}
@@ -170,7 +203,12 @@ function Home() {
 
         {/* Country Songs */}
         <Animated.View entering={FadeInUp.duration(600).delay(1200)} style={styles.section}>
-          <Text style={styles.sectionTitle}>Country</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Country</Text>
+            <TouchableOpacity onPress={() => router.push({ pathname: '/genre', params: { genre: 'country' } })}>
+              <Text style={styles.showMore}>Show More</Text>
+            </TouchableOpacity>
+          </View>
           <FlatList
             data={countrySongs}
             renderItem={renderTrack}
@@ -182,7 +220,9 @@ function Home() {
 
         {/* Featured Albums */}
         <Animated.View entering={FadeInUp.duration(600).delay(1400)} style={styles.section}>
-          <Text style={styles.sectionTitle}>Featured Albums</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Featured Albums</Text>
+          </View>
           <FlatList
             data={featuredAlbums}
             renderItem={renderAlbum}
