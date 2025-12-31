@@ -7,7 +7,7 @@ import React, { useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Animated, { FadeInUp } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
-
+import { usePlayerStore } from '../store/playerStore'; // Add import
 
 const styles = StyleSheet.create({
   container: {
@@ -55,6 +55,7 @@ const styles = StyleSheet.create({
 function Genre() {
   const { genre } = useLocalSearchParams();
   const router = useRouter();
+  const { setQueue, setCurrentTrack, playPause } = usePlayerStore(); // Add destructuring
   const [tracks, setTracks] = useState<Track[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -74,7 +75,15 @@ function Genre() {
 
   const renderTrack = ({ item }: { item: Track }) => (
     <Animated.View entering={FadeInUp.duration(600)} style={styles.item}>
-      <TrackItem track={item} horizontal={false} />
+      <TrackItem
+        track={item}
+        horizontal={false}
+        onPress={() => {
+          setQueue(tracks);
+          setCurrentTrack(item);
+          playPause();
+        }}
+      />
     </Animated.View>
   );
 

@@ -5,7 +5,7 @@ import { usePlayerStore } from '../store/playerStore';
 export function AudioPlayer() {
   const soundRef = useRef<Audio.Sound | null>(null);
   const hasStartedRef = useRef(false);
-  const { currentTrack, isPlaying, setCurrentTime, setDuration, setIsPlaying, seekTime, setSeekTime } = usePlayerStore();
+  const { currentTrack, isPlaying, setCurrentTime, setDuration, setIsPlaying, seekTime, setSeekTime, pausedPosition, setPausedPosition } = usePlayerStore();
 
   useEffect(() => {
     Audio.setAudioModeAsync({
@@ -39,7 +39,7 @@ export function AudioPlayer() {
       hasStartedRef.current = false; 
       console.log('Sound loaded successfully');
       sound.setOnPlaybackStatusUpdate((status) => {
-        // console.log('Status:', status.isLoaded ? 'Loaded' : 'Not loaded', 'Position:', status.positionMillis);
+        // console.log('Status update:', status.isLoaded, 'Position:', status.positionMillis, 'isPlaying:', status.isPlaying);
         if (status.isLoaded) {
           setDuration(status.durationMillis || 0);
           setCurrentTime(status.positionMillis || 0);
@@ -73,11 +73,17 @@ export function AudioPlayer() {
         if (!status.isLoaded) return;
         if (isPlaying) {
           console.log('Calling playAsync');
+          if (pausedPosition !== null) {
+            await soundRef.current.setPositionAsync(pausedPosition);
+            setPausedPosition(null);
+          }
           await soundRef.current.playAsync();
           hasStartedRef.current = true;
         } else {
-          console.log('Calling pauseAsync');
-          await soundRef.current.pauseAsync();
+          console.log('Calling stopAsync for pause');
+          const currentPos = status.positionMillis || 0;
+          setPausedPosition(currentPos);
+          await soundRef.current.stopAsync();
           hasStartedRef.current = false;
         }
       } catch (error) {

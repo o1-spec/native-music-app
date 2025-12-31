@@ -57,21 +57,22 @@ const styles = StyleSheet.create({
 interface TrackItemProps {
   track: Track;
   horizontal?: boolean;
+  onPress?: () => void;
 }
 
-export function TrackItem({ track, horizontal = true }: TrackItemProps) {
+export function TrackItem({ track, horizontal = true, onPress }: TrackItemProps) {
   const { setCurrentTrack, setQueue, playPause } = usePlayerStore();
 
   const handlePlay = () => {
     setQueue([track]);
     setCurrentTrack(track);
-    playPause(); 
+    playPause();
   };
 
   return (
     <TouchableOpacity
       style={[styles.card, horizontal ? styles.cardHorizontal : styles.cardVertical]}
-      onPress={handlePlay}
+      onPress={onPress || handlePlay}
     >
       <Image
         source={{ uri: track.artworkUrl || "https://via.placeholder.com/100" }}
@@ -85,7 +86,7 @@ export function TrackItem({ track, horizontal = true }: TrackItemProps) {
           {track.artist}
         </Text>
       </View>
-      <TouchableOpacity style={styles.playButton} onPress={handlePlay}>
+      <TouchableOpacity style={styles.playButton} onPress={onPress || handlePlay}>
         <Ionicons name="play" size={16} color="white" />
       </TouchableOpacity>
     </TouchableOpacity>
