@@ -1,32 +1,92 @@
-import React from "react";
-import { Image, Text, TouchableOpacity, View } from "react-native";
-import { Track } from "../types/music"; 
+import { Ionicons } from '@expo/vector-icons';
+import React from 'react';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { usePlayerStore } from '../store/playerStore';
+import { Track } from '../types/music';
+
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: '#1f2937',
+    borderRadius: 12,
+    padding: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  cardHorizontal: {
+    width: 200,
+    marginRight: 16,
+  },
+  cardVertical: {
+    width: '100%',
+    marginBottom: 16,
+  },
+  image: {
+    width: 60,
+    height: 60,
+    borderRadius: 8,
+    marginRight: 12,
+  },
+  info: {
+    flex: 1,
+  },
+  title: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  artist: {
+    color: '#9ca3af',
+    fontSize: 14,
+  },
+  playButton: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: '#3b82f6',
+    borderRadius: 20,
+    padding: 8,
+  },
+});
 
 interface TrackItemProps {
   track: Track;
-  onPress?: () => void;
+  horizontal?: boolean;
 }
 
-function TrackItem({ track, onPress }: TrackItemProps) {
+export function TrackItem({ track, horizontal = true }: TrackItemProps) {
+  const { setCurrentTrack, setQueue } = usePlayerStore();
+
+  const handlePlay = () => {
+    setQueue([track]);
+    setCurrentTrack(track);
+  };
+
   return (
-    <TouchableOpacity onPress={onPress} className="flex-row items-center p-4 bg-gray-800 rounded-lg mb-2">
+    <TouchableOpacity
+      style={[styles.card, horizontal ? styles.cardHorizontal : styles.cardVertical]}
+      onPress={handlePlay}
+    >
       <Image
-        source={{ uri: track.artworkUrl || "placeholder.png" }}
-        className="w-12 h-12 rounded mr-4"
+        source={{ uri: track.artworkUrl || "https://via.placeholder.com/100" }}
+        style={styles.image}
       />
-      <View className="flex-1">
-        <Text className="text-white text-sm font-semibold" numberOfLines={1}>
+      <View style={styles.info}>
+        <Text style={styles.title} numberOfLines={1}>
           {track.title}
         </Text>
-        <Text className="text-gray-400 text-xs" numberOfLines={1}>
+        <Text style={styles.artist} numberOfLines={1}>
           {track.artist}
         </Text>
       </View>
-      <TouchableOpacity className="ml-4">
-        <Text className="text-white text-lg">▶️</Text>
+      <TouchableOpacity style={styles.playButton} onPress={handlePlay}>
+        <Ionicons name="play" size={16} color="white" />
       </TouchableOpacity>
     </TouchableOpacity>
   );
 }
-
-export default TrackItem;

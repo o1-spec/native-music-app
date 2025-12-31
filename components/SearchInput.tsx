@@ -1,5 +1,33 @@
+import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
-import { TextInput, View } from "react-native";
+import { StyleSheet, TextInput, View } from "react-native";
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 16,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#374151',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  icon: {
+    marginRight: 12,
+  },
+  input: {
+    flex: 1,
+    color: 'white',
+    fontSize: 16,
+  },
+});
 
 interface SearchInputProps {
   onSearch: (query: string) => void;
@@ -18,17 +46,20 @@ function SearchInput({ onSearch, placeholder = "Search for songs, artists, album
   }, [query, onSearch]);
 
   return (
-    <View className="p-4">
-      <TextInput
-        value={query}
-        onChangeText={setQuery}
-        placeholder={placeholder}
-        placeholderTextColor="#9ca3af"
-        className="bg-gray-800 text-white p-4 rounded-lg"
-        autoCapitalize="none"
-        autoCorrect={false}
-        returnKeyType="search"
-      />
+    <View style={styles.container}>
+      <View style={styles.inputContainer}>
+        <Ionicons name="search" size={20} color="#9ca3af" style={styles.icon} />
+        <TextInput
+          value={query}
+          onChangeText={setQuery}
+          placeholder={placeholder}
+          placeholderTextColor="#9ca3af"
+          style={styles.input}
+          autoCapitalize="none"
+          autoCorrect={false}
+          returnKeyType="search"
+        />
+      </View>
     </View>
   );
 }

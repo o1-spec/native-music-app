@@ -1,7 +1,33 @@
-import React from "react";
-import { Text, View } from "react-native";
+import React, { useRef } from "react";
+import { StyleSheet, Text, View } from "react-native";
 import { PanGestureHandler, State } from "react-native-gesture-handler";
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue } from "react-native-reanimated";
+
+const styles = StyleSheet.create({
+  container: {
+    width: '100%',
+    paddingHorizontal: 16,
+  },
+  bar: {
+    height: 8,
+    backgroundColor: '#4b5563',
+    borderRadius: 4,
+  },
+  fill: {
+    height: '100%',
+    backgroundColor: '#3b82f6',
+    borderRadius: 4,
+  },
+  timeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 8,
+  },
+  timeText: {
+    color: 'white',
+    fontSize: 14,
+  },
+});
 
 interface ProgressBarProps {
   currentTime: number;
@@ -11,17 +37,19 @@ interface ProgressBarProps {
 
 function ProgressBar({ currentTime, duration, onSeek }: ProgressBarProps) {
   const progress = useSharedValue(currentTime / duration || 0);
-  const isSeeking = useSharedValue(false);
+  const barRef = useRef<View>(null);
+  const barWidth = useSharedValue(300); // Default, will update
 
   const animatedStyle = useAnimatedStyle(() => ({
     width: `${progress.value * 100}%`,
   }));
 
   const handleGesture = (event: any) => {
+    'worklet';
     if (event.nativeEvent.state === State.END) {
-      const newProgress = event.nativeEvent.x / 300; 
-      progress.value = newProgress;
-      runOnJS(onSeek)(newProgress * duration);
+      const newProgress = event.nativeEvent.x / barWidth.value;
+      progress.value = Math.max(0, Math.min(1, newProgress));
+      runOnJS(onSeek)(progress.value * duration);
     }
   };
 
@@ -32,15 +60,21 @@ function ProgressBar({ currentTime, duration, onSeek }: ProgressBarProps) {
   };
 
   return (
-    <View className="w-full px-4">
+    <View style={styles.container}>
       <PanGestureHandler onGestureEvent={handleGesture}>
-        <Animated.View className="h-2 bg-gray-600 rounded-full">
-          <Animated.View className="h-2 bg-blue-500 rounded-full" style={animatedStyle} />
+        <Animated.View
+          ref={barRef}
+          style={styles.bar}
+          onLayout={(event) => {
+            barWidth.value = event.nativeEvent.layout.width;
+          }}
+        >
+          <Animated.View style={[styles.fill, animatedStyle]} />
         </Animated.View>
       </PanGestureHandler>
-      <View className="flex-row justify-between mt-2">
-        <Text className="text-white text-sm">{formatTime(currentTime)}</Text>
-        <Text className="text-white text-sm">{formatTime(duration)}</Text>
+      <View style={styles.timeContainer}>
+        <Text style={styles.timeText}>{formatTime(currentTime)}</Text>
+        <Text style={styles.timeText}>{formatTime(duration)}</Text>
       </View>
     </View>
   );
