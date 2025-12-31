@@ -1,6 +1,7 @@
 import { TrackItem } from '@/components/TrackItem';
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from 'react';
-import { SectionList, StyleSheet, Text } from 'react-native';
+import { SectionList, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFavorites } from '../../hooks/useFavorites';
@@ -10,7 +11,7 @@ import { Track } from '../../types/music';
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#111827', // Solid background
+    backgroundColor: '#111827',
   },
   list: {
     padding: 16,
@@ -26,6 +27,16 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginBottom: 12,
     marginTop: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  sectionTitle: {
+    fontSize: 18,
+  },
+  viewMore: {
+    color: '#3b82f6',
+    fontSize: 16,
   },
   item: {
     marginBottom: 8,
@@ -39,6 +50,7 @@ const styles = StyleSheet.create({
 });
 
 function Library() {
+  const router = useRouter();
   const { favorites } = useFavorites();
   const [recentlyPlayed, setRecentlyPlayed] = useState<Track[]>([]);
 
@@ -50,21 +62,29 @@ function Library() {
     loadRecentlyPlayed();
   }, []);
 
+  const favoritesData = favorites.slice(0, 5);
+  const recentData = recentlyPlayed.slice(0, 5);
+
   const sections = [
-    { title: 'Favorites', data: favorites },
-    { title: 'Recently Played', data: recentlyPlayed },
+    { title: 'Favorites', data: favoritesData, showViewMore: favorites.length > 5, type: 'favorites' },
+    { title: 'Recently Played', data: recentData, showViewMore: recentlyPlayed.length > 5, type: 'recent' },
   ];
 
   const renderItem = ({ item }: { item: Track }) => (
     <Animated.View entering={FadeInUp.duration(600)} style={styles.item}>
-      <TrackItem track={item} />
+      <TrackItem track={item} horizontal={false} />
     </Animated.View>
   );
 
-  const renderSectionHeader = ({ section: { title } }: any) => (
-    <Animated.Text entering={FadeInUp.duration(600)} style={styles.sectionHeader}>
-      {title}
-    </Animated.Text>
+  const renderSectionHeader = ({ section }: any) => (
+    <Animated.View entering={FadeInUp.duration(600)} style={styles.sectionHeader}>
+      <Text style={[styles.sectionTitle, { color: 'white' }]}>{section.title}</Text>
+      {section.showViewMore && (
+        <TouchableOpacity onPress={() => router.push(section.type === 'favorites' ? '/favorites' : '/recent')}>
+          <Text style={styles.viewMore}>View More</Text>
+        </TouchableOpacity>
+      )}
+    </Animated.View>
   );
 
   const renderHeader = () => (
