@@ -1,70 +1,48 @@
-import { addRecentlyPlayed } from "@/lib/storage";
 import { create } from "zustand";
 import { Track } from "../types/music";
 
 interface PlayerState {
   currentTrack: Track | null;
+  queue: Track[];
   isPlaying: boolean;
   currentTime: number;
   duration: number;
-  queue: Track[];
-  currentIndex: number;
-  setCurrentTrack: (track: Track) => void;
+  seekTime: number | null;
+  setCurrentTrack: (track: Track | null) => void;
+  setQueue: (queue: Track[]) => void;
   setIsPlaying: (playing: boolean) => void;
   setCurrentTime: (time: number) => void;
-  setDuration: (dur: number) => void;
-  setQueue: (tracks: Track[]) => void;
+  setDuration: (duration: number) => void;
+  setSeekTime: (time: number | null) => void;
   playPause: () => void;
   nextTrack: () => void;
   previousTrack: () => void;
 }
 
-export const usePlayerStore = create<PlayerState>(
-  (
-    set: (
-      partial:
-        | Partial<PlayerState>
-        | ((state: PlayerState) => Partial<PlayerState>)
-    ) => void,
-    get: () => PlayerState
-  ) => ({
-    currentTrack: null,
-    isPlaying: false,
-    currentTime: 0,
-    duration: 0,
-    queue: [],
-    currentIndex: -1,
-    setCurrentTrack: (track: Track) => {
-      set({ currentTrack: track });
-      addRecentlyPlayed(track);
-    },
-    setIsPlaying: (playing: boolean) => set({ isPlaying: playing }),
-    setCurrentTime: (time: number) => set({ currentTime: time }),
-    setDuration: (dur: number) => set({ duration: dur }),
-    setQueue: (tracks: Track[]) =>
-      set({ queue: tracks, currentIndex: tracks.length > 0 ? 0 : -1 }),
-    playPause: () => set((state) => ({ isPlaying: !state.isPlaying })),
-    nextTrack: () => {
-      const { queue, currentIndex } = get();
-      if (currentIndex < queue.length - 1) {
-        const newIndex = currentIndex + 1;
-        set({
-          currentIndex: newIndex,
-          currentTrack: queue[newIndex],
-          currentTime: 0,
-        });
-      }
-    },
-    previousTrack: () => {
-      const { queue, currentIndex } = get();
-      if (currentIndex > 0) {
-        const newIndex = currentIndex - 1;
-        set({
-          currentIndex: newIndex,
-          currentTrack: queue[newIndex],
-          currentTime: 0,
-        });
-      }
-    },
-  })
-);
+export const usePlayerStore = create<PlayerState>((set, get) => ({
+  currentTrack: null,
+  queue: [],
+  isPlaying: false,
+  currentTime: 0,
+  duration: 0,
+  seekTime: null,
+  setCurrentTrack: (track) => set({ currentTrack: track }),
+  setQueue: (queue) => set({ queue }),
+  setIsPlaying: (playing) => set({ isPlaying: playing }),
+  setCurrentTime: (time) => set({ currentTime: time }),
+  setDuration: (duration) => set({ duration }),
+  setSeekTime: (time) => set({ seekTime: time }),
+  playPause: () => set((state) => ({ isPlaying: !state.isPlaying })),
+  nextTrack: () => {
+    const { queue, currentTrack } = get();
+    const currentIndex = queue.findIndex((t) => t.id === currentTrack?.id);
+    const nextIndex = (currentIndex + 1) % queue.length;
+    set({ currentTrack: queue[nextIndex] });
+  },
+  previousTrack: () => {
+    const { queue, currentTrack } = get();
+    const currentIndex = queue.findIndex((t) => t.id === currentTrack?.id);
+    const prevIndex = currentIndex > 0 ? currentIndex - 1 : queue.length - 1;
+    set({ currentTrack: queue[prevIndex] });
+  },
+}));

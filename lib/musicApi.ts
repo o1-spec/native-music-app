@@ -10,7 +10,7 @@ export const searchMusic = async (
   const data = await response.json();
 
   const tracks: Track[] = data.results
-    .filter((item: any) => item.kind === 'song')
+    .filter((item: any) => item.kind === 'song' && item.previewUrl)
     .map((item: any) => ({
       id: item.trackId,
       title: item.trackName,
@@ -54,7 +54,7 @@ export const getAlbum = async (id: number): Promise<Album | null> => {
     const tracks: Track[] = data.results
       .filter(
         (item: any) =>
-          item.wrapperType === 'track' && item.kind === 'song'
+          item.wrapperType === 'track' && item.kind === 'song' && item.previewUrl // Added filter for previewUrl
       )
       .map((item: any) => ({
         id: item.trackId,
